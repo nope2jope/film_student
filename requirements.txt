@@ -1,0 +1,7 @@
+requests~=2.25.1
+Flask~=1.1.2
+flask_bootstrap
+flask_sqlalchemy
+flask_wtf
+wtforms
+wtforms.validators
