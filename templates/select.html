@@ -8,14 +8,17 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 {% endblock %}
 
-{% block title %}Select Movie{% endblock %}
-
 {% block content %}
-<div class="container">
-    <h1 class="heading">Select Movie</h1>
-  <p>
-    <a href="#"> MOVIE TITLE - MOVIE RELEASE DATE</a>
-  </p>
 
-</div>
+    <div class="content">
+        <h1 class="heading">Add a Movie</h1>
+    </div>
+
+    {% for result in results %}
+
+    <p><a href="{{ url_for('select', id=result.id) }}">
+        {{result.title}} - {{result.year}}</a></p>
+
+    {% endfor %}
+
 {% endblock %}
