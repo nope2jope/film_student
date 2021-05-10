@@ -1,7 +1,8 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, flash, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
+from sqlalchemy.exc import IntegrityError
 from flask_wtf import FlaskForm
 from wtforms import StringField, FloatField, SubmitField
 from wtforms.validators import DataRequired
@@ -23,7 +24,9 @@ app = Flask(__name__)
 
 # bootstraps application
 Bootstrap(app)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+
+# prevents cookie exploits
+app.config['SECRET_KEY'] = os.environ['ENV_SECRET']
 
 # creates database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///movie-collection.db'
@@ -37,7 +40,7 @@ db = MySQLAlchemy(app)
 # that this class-model is created (i.e. create_all) is what determines the nullable status
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(80), unique=True, nullable=False)
+    title = db.Column(db.String(80), nullable=False)
     year = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(80), unique=True, nullable=False)
     rating = db.Column(db.String, nullable=True)
@@ -45,7 +48,6 @@ class Movie(db.Model):
     review = db.Column(db.String(80), nullable=True)
     img_url = db.Column(db.String(80), nullable=False)
 
-# TODO make these fields optional / autofill with present info
 class EditForm(FlaskForm):
     rating = FloatField('Updated Rating', validators=[DataRequired()])
     review = StringField('Updated Review', validators=[DataRequired()])
@@ -93,8 +95,6 @@ def delete(id):
 
     return redirect(url_for('home'))
 
-## rework add() to incorportate API — cut down on typing
-
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     add_form = AddForm()
@@ -120,12 +120,17 @@ def select(id):
     result = detective.pinpoint(search_id)
     new_movie = Movie(title=result['title'], year=result['year'], description=result['description'], img_url=result['poster'])
 
-    db.session.add(new_movie)
-    db.session.commit()
+    try:
+        db.session.add(new_movie)
+        db.session.commit()
 
+        return redirect(url_for('edit', id=new_movie.id))
 
-    return redirect(url_for('edit', id=new_movie.id))
-
+    # IntegrityError results from duplicate entry (unique req. not met)
+    # flash message shows on index.html
+    except IntegrityError:
+        flash(f'SELECTION ({new_movie.title}) ALREADY PRESENT ON LIST')
+        return redirect(url_for('home'))
 
 
 if __name__ == '__main__':

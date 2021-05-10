@@ -12,9 +12,14 @@
 {% block title %}My Top 10 Movies{% endblock %}
 
 {% block content %}
+
+{% for mesg in get_flashed_messages() %}
+<div style="background-color: white; text-align: center; font-weight: bold"><h2>{{ mesg }}</h2></div>
+{% endfor %}
+
 <div class="container">
   <h1 class="heading">My Top 10 Movies</h1>
-  <p class="description">These are my all time favourite movies.</p>
+  <p class="description">These are my all-time "favorite" "movies."</p>
    {% for movie in movies %}
   <div class="card" >
     <div class="front" style='background-image: url({{ movie.img_url }})'>

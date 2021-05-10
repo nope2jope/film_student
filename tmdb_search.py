@@ -1,14 +1,12 @@
 import requests
 
 
-
 class SearchBot:
     def __init__(self, api_key):
         self.key = api_key
         self.poster_path = 'https://image.tmdb.org/t/p/w500'
 
     def scour(self, movie_query):
-        # TODO rework search for keyword instead
         search = f'https://api.themoviedb.org/3/search/movie?api_key={self.key}&query={movie_query}'
         results = []
 
@@ -17,14 +15,13 @@ class SearchBot:
 
         data = response.json()
 
-        # TODO update this mess
         for entry in data['results']:
             template = {
                 'id': f"{entry['id']}",
                 'title': f"{entry['title']}",
                 'year': f"{entry['release_date']}",
-                'description': f"{entry['overview']}",
-                'poster': f"{self.poster_path}+{entry['poster_path']}",
+                # 'description': f"{entry['overview']}",
+                # 'poster': f"{self.poster_path}+{entry['poster_path']}",
             }
 
             results.append(template)
